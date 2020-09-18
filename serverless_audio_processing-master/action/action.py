@@ -87,10 +87,10 @@ def main(args):
     resposta = {
         'recommendation': '',
         'entities': [],
-        'texto_forms': texto_forms,
-        'texto_audio': texto_audio,
-        'texto_concat': texto,
-        'car': carro
+        #'texto_forms': texto_forms,
+        #'texto_audio': texto_audio,
+        #'texto_concat': texto,
+        #'car': carro
     }
 
     if(len(texto) > 12):
@@ -114,7 +114,7 @@ def main(args):
         # call Watson API
         nlu_result = nlu.analyze(
                 text=texto,
-                features=Features(entities=EntitiesOptions(sentiment=True,limit=5, model='ab9e03c9-ea05-44db-9466-5a256f6d7c3b'))
+                features=Features(entities=EntitiesOptions(sentiment=True,limit=5, model='fb03b324-e9d9-4e85-b705-ac6ef603c22a'))
             ).get_result()
 
 
@@ -183,7 +183,7 @@ def main(args):
             else:
                 resposta['recommendation'] = recomendado[2]
 
-        resposta['menor'] = menor
+        #resposta['menor'] = menor
         resposta['entities'] = result_entidades
 
 
