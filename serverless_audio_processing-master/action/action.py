@@ -30,10 +30,6 @@ def main(args):
     if 'car' in multipart_data:
         carro = multipart_data.get('car')[0]
 
-    retorno = {
-        'recommendation': ''
-    }
-
     texto_audio = ''
 
     if 'audio' in multipart_data:
@@ -77,18 +73,119 @@ def main(args):
             ).get_result()
 
         # Print STT API call results
-        print(json.dumps(stt_result, indent=2))
+        #print(json.dumps(stt_result, indent=2))
         texto_audio = stt_result['results'][0]['alternatives'][0]['transcript']
 
     # pega o texto da mensagem
-    texto_forms = 'Sem texto'
+    texto_forms = ''
     if('text' in multipart_data):
         texto_forms = multipart_data.get('text')[0]
 
+    texto = texto_audio + texto_forms
+
+    # prepara resposta padrao
+    resposta = {
+        'recommendation': '',
+        'entities': [],
+        'texto_forms': texto_forms,
+        'texto_audio': texto_audio,
+        'texto_concat': texto,
+        'car': carro
+    }
+
+    if(len(texto) > 12):
+        # Basic Authentication with Watson NLU API
+        nlu_authenticator = BasicAuthenticator(
+            'apikey',
+            'skEXm4q1Mn9XLLuQBOawyrovnjER9QDMLyht__-F4QtT'
+        )
+
+        # Construct a Watson NLU client with the authentication object
+        nlu = NaturalLanguageUnderstandingV1(
+            version='2020-08-01',
+            authenticator=nlu_authenticator
+        )
+
+        # Set the URL endpoint for your Watson STT client
+        nlu.set_service_url(
+            'https://api.us-south.natural-language-understanding.watson.cloud.ibm.com'
+        )
+
+        # call Watson API
+        nlu_result = nlu.analyze(
+                text=texto,
+                features=Features(entities=EntitiesOptions(sentiment=True,limit=5, model='ab9e03c9-ea05-44db-9466-5a256f6d7c3b'))
+            ).get_result()
+
+
+        # Print NLU API call results
+        #print(json.dumps(nlu_result, indent=2))
+
+        entidades = nlu_result['entities']
+
+        # primeiro criar um rank das entidades, e a parte entitys da resposta
+        rank_entidades = dict()
+        result_entidades = []
+        modelo = ''
+
+        for entidade in entidades:
+            ent = entidade['type']
+            sent = entidade['sentiment']['score']
+            mention = entidade['text']
+            if (ent != 'MODELO'):
+                if ent in rank_entidades:
+                    if sent < rank_entidades[ent]:
+                        rank_entidades[ent] = sent
+                else:
+                    rank_entidades[ent] = sent
+            else:
+                modelo = mention
+                    
+            result_entidades.append({'entity': ent, 
+                                    'sentiment': sent, 
+                                   'mention': mention})
+
+        # Definicao de prioridade das reclamacoes e lista de carros a sugerir 
+        # (coloquei tres na sugestao pois entendi que tinha que evita o modelo em 'car' e talvez um modelo no texto
+        prioridades = {
+            'SEGURANCA': 1,
+            'CONSUMO': 2,
+            'DESEMPENHO': 3,
+            'MANUTENCAO': 4,
+            'CONFORTO': 5,
+            'DESIGN': 6,
+            'ACESSORIOS': 7
+            }
+
+        sugestoes = {
+            'SEGURANCA': ['FIAT 500','DUCATO', 'RENEGADE'],
+            'CONSUMO': ['ARGO', 'TORO', 'DUCATO'],
+            'DESEMPENHO': ['ARGO', 'CRONOS', 'MAREA'],
+            'MANUTENCAO': ['FIORINO', 'CRONOS', 'ARGO'],
+            'CONFORTO': ['ARGO', 'CRONOS', 'TORO'],
+            'DESIGN': ['FIAT 500', 'ARGO', 'RENEGADE'],
+            'ACESSORIOS': ['RENEGADE', 'ARGO', 'TORO']    
+            }
+
+
+        # acha a menor nota
+        menor = rank_entidades[min(rank_entidades, key=rank_entidades.get)]
+        if menor < 0:
+            # separa os que tem nota até 0.1 próxima com as prioridades
+            most_negatives = {k: prioridades[k] for k, v in rank_entidades.items() if abs(v - menor) < 0.1}
+
+            # pega lista de recomendacoes do que tem a menor prioridade
+            recomendado = sugestoes[min(most_negatives, key = most_negatives.get)]
+            if(recomendado[0] not in [carro, modelo]):
+                resposta['recommendation'] = recomendado[0]
+            elif(recomendado[1] not in [carro, modelo]):
+                resposta['recommendation'] = recomendado[1]
+            else:
+                resposta['recommendation'] = recomendado[2]
+
+        resposta['menor'] = menor
+        resposta['entities'] = result_entidades
+
 
     # Return a dictionary with the transcribed text
-    return {
-        "car": carro,
-        "transcript": texto_audio,
-        "texto": texto_forms
-    }
+    return(resposta)
