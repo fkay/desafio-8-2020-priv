@@ -1,0 +1,9 @@
+Entidade		Exemplo de marcação
+ACESSORIOS		Ar condicionado, Porta treco, painel, porta copos
+CONFORTO		Banco de couro, suspensão, direçao/volante, cambio automatico, espaço interno, banco, isolamento acustico, espaço, altura volante, regulagem banco/lombar, absorção de impactos,
+CONSUMO			10KM/L, economico
+DESEMPENHO		Motor, arrancar, cambio manual, ultrapassagem, retomada
+DESIGN			4 portas, porta-malas, interior, frente, lanterna traseira, acabamento, moderno, desenho, visibilidade, visual, simples
+MANUTENCAO		Manutençao, mão de obra mecânica
+MODELO			FIAT Argo 1.8
+SEGURANCA		Freio, ABS, Airbag, estabilidade, curvas, ASR (antislip)
