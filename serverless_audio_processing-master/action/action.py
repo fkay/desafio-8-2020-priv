@@ -30,6 +30,8 @@ def main(args):
     fo.write(multipart_data.get('audio')[0])
     fo.close()
 
+    text = multipart_data.get('text')[0]
+
     # Basic Authentication with Watson STT API
     stt_authenticator = BasicAuthenticator(
         'apikey',
@@ -67,5 +69,6 @@ def main(args):
 
     # Return a dictionary with the transcribed text
     return {
-        "transcript": stt_result['results'][0]['alternatives'][0]['transcript']
+        "transcript": stt_result['results'][0]['alternatives'][0]['transcript'],
+        "text": text
     }
