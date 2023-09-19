@@ -43,7 +43,7 @@ def main(args):
         # Basic Authentication with Watson STT API
         stt_authenticator = BasicAuthenticator(
             'apikey',
-            'qa8K2ibwTd2CoJAvrUfhSNaZL2nlrIjaafpjTxslF30C'
+            'xxx'
         )
 
         # Construct a Watson STT client with the authentication object
@@ -97,7 +97,7 @@ def main(args):
         # Basic Authentication with Watson NLU API
         nlu_authenticator = BasicAuthenticator(
             'apikey',
-            'skEXm4q1Mn9XLLuQBOawyrovnjER9QDMLyht__-F4QtT'
+            'xxxx'
         )
 
         # Construct a Watson NLU client with the authentication object
